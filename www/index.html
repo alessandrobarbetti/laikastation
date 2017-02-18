@@ -34,37 +34,15 @@
 
 </head>
 
-<body>
+<body class="theme-orange">
     <!-- Status bar overlay for full screen mode (PhoneGap) -->
     <div class="statusbar-overlay"></div>
 
-    <!-- Panels overlay-->
-    <div class="panel-overlay"></div>
-    <!-- Left panel with reveal effect-->
-    <div class="panel panel-left panel-reveal">
-        <div class="content-block">
-            <p>Left panel content goes here</p>
-        </div>
-    </div>
 
     <!-- Views -->
-    <div class="views">
+    <div class="views tabs toolbar-through">
         <!-- Your main view, should have "view-main" class -->
-        <div class="view view-main">
-            <!-- Top Navbar-->
-            <div class="navbar">
-                <div class="navbar-inner">
-                    <!-- We need cool sliding animation on title element, so we have additional "sliding" class -->
-                    <div class="center sliding">Awesome App</div>
-                    <div class="right">
-                        <!--
-                          Right link contains only icon - additional "icon-only" class
-                          Additional "open-panel" class tells app to open panel when we click on this link
-                        -->
-                        <a href="#" class="link icon-only open-panel"><i class="icon icon-bars"></i></a>
-                    </div>
-                </div>
-            </div>
+        <div id="ble" class="view view-main tab active">
             <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
             <div class="pages navbar-through toolbar-through">
                 <!-- Page, "data-page" contains page name -->
@@ -72,36 +50,133 @@
                     <!-- Scrollable page content -->
                     <div class="page-content">
                         <div class="content-block">
-                             <canvas id="updating-chart" width="500" height="300"></canvas>
-
-                            <p id="ax">Accelleration x:<span id="ax_val"></span></p>
-                            <p id="ay">Accelleration y:<span id="ay_val"></span></p>
-                            <p id="az">Accelleration z:<span id="az_val"></span></p>
-
-                            <div onclick="disconnect()" style="padding:10px; border:1px solid #909090; margin-bottom: 20px;" id="disconnect">DISCONNECT</div>
-                            <!-- Link to another page -->
-                            <a href="about.html">About app</a>
+                            <div class="content-block-title">Bluetooth Devices</div>
+                            <p id="search-ble-block"><a href="#" onclick="startDeviceScan()" class="button button-big button-fill">Cerca Devices</a></p>
+                            <div id="ble-devices" class="list-block">
+                                <ul>
+                                </ul>
+                                <p style="text-align:center; font-size: 0.8em;">Se LaikaStation non viene rilevata provare a disattivare e riattivare il bluetooth.</p>
+                            </div>
+                            <div class="spinner-block">
+                                <div class="spinner"></div>
+                                <div class="spinner-text"></div>
+                            </div>
+                            <div id="connected-block">
+                                <div id="connected-to"></div>
+                                <p id="disconnect-block"><a href="#" onclick="disconnect()" class="button button-big button-fill">DISCONNETTI</a></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Bottom Toolbar-->
-            <div class="toolbar">
-                <div class="toolbar-inner">
-                    <!-- Toolbar links -->
-                    <a href="#" class="link">Link 1</a>
-                    <a href="#" class="link">Link 2</a>
+        </div>
+
+        <div id="stazione" class="view tab">
+            <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
+            <div class="pages navbar-through toolbar-through">
+                <!-- Page, "data-page" contains page name -->
+                <div data-page="stazione" class="page">
+                    <!-- Scrollable page content -->
+                    <div class="page-content">
+                        <div class="content-block">
+                            <div class="content-block-title">Stazione</div>
+                            <div id="date-stc">
+                                <span id="date-day"></span>/
+                                <span id="date-month"></span>/
+                                <span id="date-year"></span>
+                            </div>
+                            <div id="time-stz">
+                                <span id="time-hour"></span>:
+                                <span id="time-minute"></span>:
+                                <span id="time-second"></span>
+                            </div>
+                            <form id="stazione-form" class="list-block">
+                              <ul>
+                                <li>
+                                  <div class="item-content">
+                                    <div class="item-inner">
+                                      <div class="item-title label">Name</div>
+                                      <div class="item-input">
+                                        <input type="text" name="name" placeholder="Your name">
+                                      </div>
+                                    </div>
+                                  </div>
+                                </li>
+                              </ul>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div id="impostazioni" class="view tab">
+            <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
+            <div class="pages navbar-through toolbar-through">
+                <!-- Page, "data-page" contains page name -->
+                <div data-page="impostazioni" class="page">
+                    <!-- Scrollable page content -->
+                    <div class="page-content">
+                        <div class="content-block">
+                            <div class="content-block-title">Impostazioni</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="avanzate" class="view tab">
+            <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
+            <div class="pages navbar-through toolbar-through">
+                <!-- Page, "data-page" contains page name -->
+                <div data-page="avanzate" class="page">
+                    <!-- Scrollable page content -->
+                    <div class="page-content">
+                        <div class="content-block">
+                            <div class="content-block-title">Avanzate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Toolbar-->
+        <div class="toolbar tabbar tabbar-labels">
+            <div class="toolbar-inner">
+                <a href="#ble" class="tab-link active">
+                    <i class="f7-icons">reload_found_fill</i>
+                    <span class="tabbar-label">Connessione</span>
+                </a>
+                <a href="#stazione" class="tab-link">
+                    <i class="f7-icons">home</i>
+                    <span class="tabbar-label">Stazione</span>
+                </a>
+                <a href="#impostazioni" class="tab-link">
+                    <i class="f7-icons">filter_fill</i>
+                    <span class="tabbar-label">Impostazioni</span>
+                </a>
+                <a href="#avanzate" class="tab-link">
+                    <i class="f7-icons">gear</i>
+                    <span class="tabbar-label">Avanzate</span>
+                </a>
+            </div>
+        </div>
+
     </div>
 
+    <script type="text/javascript">
+    window.onerror = function(msg, url, linenumber) {
+        alert('Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
+        return true;
+    }
+    </script>
+
+    <link rel="stylesheet" href="lib/framework7/css/framework7-icons.css">
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="lib/framework7/js/framework7.min.js"></script>
-
-    <script src="//www.chartjs.org/assets/Chart.min.js"></script>
-
+    <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/my-app.js"></script>
+
 
 </body>
 
