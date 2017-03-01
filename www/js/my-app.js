@@ -99,14 +99,15 @@ function startDeviceScan(){
 
 function listDevices(devices){
 
-    $('#ble-devices ul').html("");
+    $$('#ble-devices ul').html("");
     if(devices.length > 0){   
         for(var i = 0; i < devices.length; i++){
-            var el = '<li class="item-content" ontouchend="connectToDevice('+i+')"><div class="item-inner"><div class="item-title">'+devices[i].name+'</div><div class="item-after">'+devices[i].id+'</div></div></li>';
-            $('#ble-devices ul').append(el);
+            var el = '<li class="item-content" id="ble-device'+i+'"><div class="item-inner"><div class="item-title">'+devices[i].name+'</div><div class="item-after">'+devices[i].id+'</div></div></li>';
+            $$('#ble-devices ul').append(el);
+            $$('#ble-device'+i).click(create_connect_callback(i));
         }
     }else{
-        $('#ble-devices ul').html('<li class="item-content"><div class="item-inner"><div class="item-title">Nessun device trovato.</div></li>');
+        $$('#ble-devices ul').html('<li class="item-content"><div class="item-inner"><div class="item-title">Nessun device trovato.</div></li>');
     }
 
     $('#ble-devices').fadeIn('fast');
@@ -119,6 +120,9 @@ function connectToDevice(i){
             }, function(){ myApp.alert("Errore durante la connessione al device."); disconnect(); });
 }
 
+function create_connect_callback(j){
+    return function(){connectToDevice(j);}
+}
 
 function getStatus(){
     
