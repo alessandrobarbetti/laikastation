@@ -28,8 +28,6 @@
     <plugin name="cordova-plugin-console" spec="~1.0.1" />
     <plugin name="cordova-plugin-statusbar" spec="~1.0.1" />
     <plugin name="cordova-plugin-statusbar" spec="~1.0.1" />
-    <gap:plugin name="cordova-plugin-ble-central" source="npm" />
-    <preference name="phonegap-version" value="cli-6.1.0" />
     <plugin name="cordova-plugin-ble-central" spec="https://github.com/timkim/cordova-plugin-ble-central.git#bluetoothUsage">
         <variable name="BLUETOOTH_USAGE_DESCRIPTION" value="Bluetooth development purposes" />
     </plugin>
