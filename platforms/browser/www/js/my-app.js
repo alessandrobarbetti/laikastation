@@ -17,6 +17,7 @@ var stzService_uuid = "da721f52-d970-11e6-bf26-cec0c932ce01";
 var lat_uuid = "f321fb70-d971-11e6-bf26-cec0c932ce01";
 var lon_uuid = "f321fdb4-d971-11e6-bf26-cec0c932ce01";
 var tempo_monit_uuid = "f321feae-d971-11e6-bf26-cec0c932ce01";
+var stato_monit_uuid = "33ade16a-fda6-11e6-bc64-92361f002671";
 var isLaika_uuid = "9e6850ba-d972-11e6-bf26-cec0c932ce01";
 
 var day_uuid = "d02d0988-edd6-11e6-bc64-92361f002671";
@@ -26,16 +27,15 @@ var hour_uuid = "d02d12de-edd6-11e6-bc64-92361f002671";
 var minute_uuid = "d02d14e6-edd6-11e6-bc64-92361f002671";
 var second_uuid = "d02d1694-edd6-11e6-bc64-92361f002671";
 
+var dateSet_uuid = "c93a1b94-fcd5-11e6-bc64-92361f002671";
+var timeSet_uuid = "c93a1df6-fcd5-11e6-bc64-92361f002671";
+
 var day = "01";
 var month = "01";
 var year = "2017";
 var hour = "00";
 var minute = "00";
 var second = "00";
-
-var lat = 0;
-var lon = 0;
-var tempo_monitoraggio = 0;
 
 var dev = null;
 
@@ -54,9 +54,7 @@ var mainView = myApp.addView('.view-main', {
 $$(document).on('deviceready', function() {
     ble.isEnabled(function() { startDeviceScan(); },
         function() { 
-            ble.enable( function(){ startDeviceScan(); }, 
-                        function(){ myApp.alert("L'app non è riuscita ad abilitare il Bluetooth. Abilitarlo dalle impostazione del elefono e riavviare l'app."); }
-                        );
+            myApp.alert("Abilitare il Bluetooth per collegarsi alla Stazione Laika");
         });
 });
 
@@ -64,9 +62,7 @@ $$(document).on('deviceready', function() {
 $$(document).on('resume', function() {
     if(dev != null){
         ble.isConnected(dev.id, function(){ getStatus() }, function(){
-            ble.enable( function(){ startDeviceScan(); }, 
-                        function(){ myApp.alert("L'app non è riuscita ad abilitare il Bluetooth. Abilitarlo dalle impostazione del elefono e riavviare l'app."); }
-                        );
+           myApp.alert("Abilitare il Bluetooth per collegarsi alla Stazione Laika");
         });
     }
 });
@@ -112,9 +108,6 @@ function connectToDevice(i){
     dev = devices[i];
     ble.connect(dev.id, function(){
                 ble.read(dev.id, stzService_uuid, isLaika_uuid, function(s){ var k = bytesToInt(s); if(k != 1){ disconnect(); myApp.alert("Periferica non riconosciuta."); }else{ getStatus(); } }, function(){ myApp.alert("Errore durante la connessione al device."); disconnect(); });
-                //ble.write(dev_id, stzService_uuid, lat_uuid, floatToBytes(20.1234),function(){ alert("Written"); }, function(){alert("error");});
-                //var tx_buffer = stringToBytes("12345678912345678912");
-                //ble.writeWithoutResponse(dev_id, uart_service, tx, stringToBytes("12345678912345678912"), function(){alert("ok");}, function(){alert("error");});
             }, function(){ myApp.alert("Errore durante la connessione al device."); disconnect(); });
 }
 
@@ -127,10 +120,44 @@ function getStatus(){
             $("#connected-block").fadeIn('fast');
     });
     stz = {};
-    ble.read(dev.id, stzService_uuid, lat_uuid, function(lat){ stz['lat'] = bytesToFloat(lat) }, function(){ myApp.alert("impossibile recuperare i dati sulla posizione dalla stazione."); disconnect(); }); 
-    ble.read(dev.id, stzService_uuid, lon_uuid, function(lon){ stz['lon'] = bytesToFloat(lon) }, function(){ myApp.alert("impossibile recuperare i dati sulla posizione dalla stazione."); disconnect(); });
+
+    readLat();
+    readLon();
+    readStatoMonit();
+    
+    $$('#btn-stz').removeClass('disabled');
+    $$('#btn-imp').removeClass('disabled');
+    $$('#btn-avz').removeClass('disabled');
+    
+    linkStz();
     linkClock();
-    setTimeout(function(){myApp.alert(JSON.stringify(stz));},1000);
+    setTimeout(function(){},1000);
+}
+
+function linkStz(){
+    ble.startNotification(dev.id, stzService_uuid, stato_monit_uuid, function(buf){ 
+                                                                    stz['stato-monitoraggio'] = bytesToInt(buf);                                                                
+                                                                    
+                                                                    if(stz['stato-monitoraggio'] == 1){
+                                                                        $$('#input-monitoraggio').prop('checked', true);
+                                                                    }else{
+                                                                        $$('#input-monitoraggio').prop('checked', false);
+                                                                    }
+                                                                });
+
+    ble.startNotification(dev.id, stzService_uuid, lat_uuid, function(buf){ 
+                                                                    stz['lat'] = bytesToFloat(buf);
+                                                                    $$("#lat-val").html(stz['lat']);
+                                                                });
+
+    ble.startNotification(dev.id, stzService_uuid, lon_uuid, function(buf){ 
+                                                                    stz['lon'] = bytesToFloat(buf);
+                                                                    $$("#lon-val").html(stz['lon']);
+                                                                });
+    ble.startNotification(dev.id, stzService_uuid, tempo_monit_uuid, function(buf){ 
+                                                                    stz['esp'] = bytesToFloat(buf);
+                                                                    $$("#esp-val").html(stz['esp']);
+                                                                });
 }
 
 function linkClock(){
@@ -145,7 +172,6 @@ function linkClock(){
                                                                     }
                                                                     $("#date-day").html(day);
                                                                     
-
                                                                 });
     
     ble.startNotification(dev.id, stzService_uuid, month_uuid, function(buf){ 
@@ -156,7 +182,7 @@ function linkClock(){
                                                                         month = m.toString();
                                                                     }
                                                                     $("#date-month").html(month);
-
+                                                                    
                                                                 });
     ble.startNotification(dev.id, stzService_uuid, year_uuid, function(buf){ 
                                                                     var y = bytesToInt(buf); 
@@ -170,6 +196,7 @@ function linkClock(){
                                                                         year = y.toString();
                                                                     }
                                                                     $("#date-year").html(year);
+                                                                    
 
                                                                 });
     ble.startNotification(dev.id, stzService_uuid, hour_uuid, function(buf){ 
@@ -180,7 +207,7 @@ function linkClock(){
                                                                         hour = h.toString();
                                                                     }
                                                                     $("#time-hour").html(hour);
-
+                                                                    
                                                                 });
     ble.startNotification(dev.id, stzService_uuid, minute_uuid, function(buf){ 
                                                                     var m = bytesToInt(buf); 
@@ -190,7 +217,7 @@ function linkClock(){
                                                                         minute = m.toString();
                                                                     }
                                                                     $("#time-minute").html(minute);
-
+                                                                    
                                                                 });
     ble.startNotification(dev.id, stzService_uuid, second_uuid, function(buf){ 
                                                                     var s = bytesToInt(buf); 
@@ -200,10 +227,16 @@ function linkClock(){
                                                                         second = s.toString();
                                                                     }
                                                                     $("#time-second").html(second);
-
                                                                 });
                                                                 
     
+}
+
+function unlinkStz(){
+    ble.stopNotification(dev.id, stzService_uuid, stato_monit_uuid);
+    ble.stopNotification(dev.id, stzService_uuid, lat_uuid);
+    ble.stopNotification(dev.id, stzService_uuid, lon_uuid);
+    ble.stopNotification(dev.id, stzService_uuid, tempo_monit_uuid);
 }
 
 function unlinkClock(){
@@ -217,6 +250,7 @@ function unlinkClock(){
 
 function disconnect(){
     if(dev != null){
+        unlinkStz();
         unlinkClock();
         ble.disconnect(dev.id);
         $("#search-ble-block").fadeIn('fast');
@@ -224,8 +258,44 @@ function disconnect(){
         $("#connected-block").fadeOut('fast');
         dev = null;
         stz = null;
-
+        $$('#btn-stz').addClass('disabled');
+        $$('#btn-imp').addClass('disabled');
+        $$('#btn-avz').addClass('disabled');
     }
+    myApp.showTab('#ble');
+}
+
+function readLat(){
+   ble.read(dev.id, stzService_uuid, lat_uuid, function(buf){ 
+                                                                stz['lat'] = bytesToFloat(buf).toFixed(4);                                                            
+                                                                $$("#lat-val").html(stz['lat']);
+                                                            }, function(){ });
+}
+
+function readLon(){
+    ble.read(dev.id, stzService_uuid, lon_uuid, function(buf){ 
+                                                                stz['lon'] = bytesToFloat(buf).toFixed(4);                                                                
+                                                                $$("#lon-val").html(stz['lon']);
+                                                            }, function(){ });
+}
+
+function readEsp(){
+    ble.read(dev.id, stzService_uuid, tempo_monit_uuid, function(buf){ 
+                                                                stz['esp'] = bytesToFloat(buf);
+                                                                $$("#esp-val").html(stz['esp']);
+                                                            }, function(){ });
+}
+
+function readStatoMonit(){
+    ble.read(dev.id, stzService_uuid, stato_monit_uuid, function(buf){ 
+                                                                    stz['stato-monitoraggio'] = bytesToInt(buf);                                                                
+                                                                    
+                                                                    if(stz['stato-monitoraggio'] == 1){
+                                                                        $$('#input-monitoraggio').prop('checked', true);
+                                                                    }else{
+                                                                        $$('#input-monitoraggio').prop('checked', false);
+                                                                    }
+                                                                }, function(){ });
 }
 
 // ASCII only
@@ -258,6 +328,214 @@ function bytesToInt(buffer){
     return x[0];
 }
 
-$('#stazione').on('show', function(){
+function intToBytes(i){
+    var x = new Int32Array(1);
+    x[0] = i;
+    return x.buffer;
+}
 
+$$('#mod-data').on('click', function () {
+    myApp.modal({
+        title:  'Modifica data:',
+        text: '<input id="new-date-input" type="date" value="'+year+'-'+month+'-'+day+'">',
+        onClick: function(m,i){
+            if(i == 0){
+                var d = new Date($$(m).find("#new-date-input")[0].value);
+                if(isNaN(d)){
+                    myApp.alert("Data inserita non valida");
+                }else{
+                    ble.write(dev.id, stzService_uuid, dateSet_uuid, intToBytes(1),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, day_uuid, intToBytes(d.getDate()),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, month_uuid, intToBytes(d.getMonth()+1),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, year_uuid, intToBytes(d.getFullYear()),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, dateSet_uuid, intToBytes(0),function(){ }, function(){ });
+                }
+            }else if(i == 1){
+                var d = new Date();
+                d.setTime( d.getTime() + 60*1000 );
+                ble.write(dev.id, stzService_uuid, dateSet_uuid, intToBytes(1),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, day_uuid, intToBytes(d.getDate()),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, month_uuid, intToBytes(d.getMonth()+1),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, year_uuid, intToBytes(d.getFullYear()),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, dateSet_uuid, intToBytes(0),function(){ }, function(){ });
+            }
+        },
+        buttons: [
+            {
+                text: 'Imposta'
+            },
+             {
+                text: 'Da Tel.'
+            },
+            {
+                text: 'Annulla'
+            },
+        ]
+    })
+});
+
+$$('#mod-ora').on('click', function () {
+    myApp.modal({
+        title:  'Modifica ora:',
+        text: '<input id="new-ora-input" type="time" step="1" value="'+hour+':'+minute+':'+second+'">',
+        onClick: function(m,i){
+            if(i == 0){
+                var input = $$(m).find("#new-ora-input")[0].value.split(':');
+                if(input.length != 3 && input.length != 2){
+                    myApp.alert("Ora inserita non valida");
+                }else{
+                    if(input.length == 2){
+                        input[2] = 0;
+                    }
+                    ble.write(dev.id, stzService_uuid, timeSet_uuid, intToBytes(1),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, hour_uuid, intToBytes(input[0]),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, minute_uuid, intToBytes(input[1]),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, second_uuid, intToBytes(input[2]),function(){ }, function(){ });
+                    ble.write(dev.id, stzService_uuid, timeSet_uuid, intToBytes(0),function(){ }, function(){ });
+                }
+            }else if(i == 1){
+                
+                var d = new Date();
+                d.setTime( d.getTime() + 60*1000 );
+
+                ble.write(dev.id, stzService_uuid, timeSet_uuid, intToBytes(1),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, hour_uuid, intToBytes(d.getHours()),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, minute_uuid, intToBytes(d.getMinutes()),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, second_uuid, intToBytes(d.getSeconds()),function(){ }, function(){ });
+                ble.write(dev.id, stzService_uuid, timeSet_uuid, intToBytes(0),function(){ }, function(){ });
+                
+            }
+        },
+        buttons: [
+            {
+                text: 'Imposta'
+            },
+            {
+                text: 'Da Tel.'
+            },
+            {
+                text: 'Annulla'
+            },
+        ]
+    })
+});
+
+$$('#mod-lat').on('click', function () {
+    myApp.modal({
+        title:  'Modifica latitudine:',
+        text: '<input id="new-lat-input" type="number" min="-90" max="90" step="0.0001" value="'+stz['lat']+'">',
+        onClick: function(m,i){
+            if(i == 0){
+                var input = $$(m).find("#new-lat-input")[0].value;
+                if(isNaN(parseFloat(input)) || input < -90 || input > 90 ){
+                    myApp.alert("Latitudine inserita non valida");
+                }else{
+                    input = parseFloat(input).toFixed(4);
+                    ble.write(dev.id, stzService_uuid, lat_uuid, floatToBytes(input),function(){ }, function(){ });
+                    readLat();
+                }
+            }else if(i == 1){
+                navigator.geolocation.getCurrentPosition(function(position){ 
+                    var input = parseFloat(position.coords.latitude).toFixed(4);
+                    ble.write(dev.id, stzService_uuid, lat_uuid, floatToBytes(input),function(){ }, function(){ });
+                    readLat();
+                });
+            }
+        },
+        buttons: [
+            {
+                text: 'Imposta'
+            },
+            {
+                text: 'Da Gps'
+            },
+            {
+                text: 'Annulla'
+            },
+        ]
+    })
+});
+
+$$('#mod-lon').on('click', function () {
+    myApp.modal({
+        title:  'Modifica longitudine:',
+        text: '<input id="new-lon-input" type="number" min="-180" max="180" step="0.0001" value="'+stz['lon']+'">',
+        onClick: function(m,i){
+            if(i == 0){
+                var input = $$(m).find("#new-lon-input")[0].value;
+                if(isNaN(parseFloat(input)) || input < -180 || input > 180 ){
+                    myApp.alert("Longitudine inserita non valida");
+                }else{
+                    input = parseFloat(input).toFixed(4);
+                    ble.write(dev.id, stzService_uuid, lon_uuid, floatToBytes(input),function(){ }, function(){ });
+                    readLon();
+                }
+            }else if(i == 1){
+                navigator.geolocation.getCurrentPosition(function(position){ 
+                    var input = parseFloat(position.coords.longitude).toFixed(4);
+                    ble.write(dev.id, stzService_uuid, lon_uuid, floatToBytes(input),function(){ }, function(){ });
+                    readLon();
+                });
+                
+            }
+        },
+        buttons: [
+            {
+                text: 'Imposta'
+            },
+            {
+                text: 'Da Gps'
+            },
+            {
+                text: 'Annulla'
+            },
+        ]
+    })
+});
+
+$$('#mod-esp').on('click', function () {
+    myApp.modal({
+        title:  'Modifica Minuti Esposizione:',
+        text: '<input id="new-esp-input" type="number" min="0" max="9999999" step="1" value="'+stz['esp']+'">',
+        onClick: function(m,i){
+            if(i == 0){
+                var input = $$(m).find("#new-esp-input")[0].value;
+                if(isNaN(parseInt(input)) || input < 0){
+                    myApp.alert("Tempo di esposizione inserito non valido.");
+                }else{
+                    input = parseInt(input);
+                    ble.write(dev.id, stzService_uuid, tempo_monit_uuid, intToBytes(input),function(){ }, function(){ });
+                    readEsp();
+                }
+            }
+        },
+        buttons: [
+            {
+                text: 'Imposta'
+            },
+            {
+                text: 'Annulla'
+            },
+        ]
+    })
+});
+
+$$('#input-monitoraggio').on('change', function(){
+
+    if(this.checked){
+        ble.write(dev.id, stzService_uuid, stato_monit_uuid, intToBytes(1),function(){ }, function(){ });
+        readStatoMonit();
+    }else{
+        ble.write(dev.id, stzService_uuid, stato_monit_uuid, intToBytes(0),function(){ }, function(){ });
+        readStatoMonit();
+    }
+
+})
+
+$$('#stazione').on('show', function(){
+
+});
+
+$$('#impostazioni').on('show', function(){
+    //$("#settings-date-time-input").value = $("#date-year").html()+"/"+$("#date-month").html()+"/"+$("#date-day").html()+"T"+$("#time-hour").html()+":"+$("#time-minute").html()+":"+$("#time-second").html();
 });

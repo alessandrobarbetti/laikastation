@@ -80,30 +80,94 @@
                     <div class="page-content">
                         <div class="content-block">
                             <div class="content-block-title">Stazione</div>
-                            <div id="date-stc">
-                                <span id="date-day"></span>/
-                                <span id="date-month"></span>/
-                                <span id="date-year"></span>
-                            </div>
-                            <div id="time-stz">
-                                <span id="time-hour"></span>:
-                                <span id="time-minute"></span>:
-                                <span id="time-second"></span>
-                            </div>
-                            <form id="stazione-form" class="list-block">
+                            <div class="list-block">
+                            <form id="stazione-form">
                               <ul>
+
                                 <li>
                                   <div class="item-content">
+                                    <div class="item-media"><i class="icon f7-icons">check</i></div>
                                     <div class="item-inner">
-                                      <div class="item-title label">Name</div>
-                                      <div class="item-input">
-                                        <input type="text" name="name" placeholder="Your name">
-                                      </div>
+                                        
+                                        <div class="item-title label">Monit.</div>
+                                        <div class="item-input">
+                                            <label class="label-switch">
+                                                <input id="input-monitoraggio" name="stato-monitoraggio" type="checkbox">
+                                                <div id="switch-monitoraggio" class="checkbox"></div>
+                                            </label>
+                                        </div>
                                     </div>
                                   </div>
                                 </li>
+                                <li class="item-content">
+                                    <div class="item-media"><i class="icon f7-icons">timer</i></div>
+                                    <div class="item-inner">
+                                    <div class="item-title label">Esp.</div>
+                                    <div class="item-input">
+                                        <span id="esp-val"></span>
+                                        <span id="mod-esp" style="float:right" class="item-after"><i class="icon f7-icons">compose</i></span>
+                                    </div>
+                                    </div>
+                                </li>
+                                <li class="item-divider"></li>
+                                <li class="item-content">
+                                    <div class="item-media"><i class="icon f7-icons">calendar</i></div>
+                                    <div class="item-inner">
+                                    
+                                    <div class="item-title label">Data</div>
+                                    <div class="item-input">
+                                        <span id="date-day"></span> /
+                                        <span id="date-month"></span> /
+                                        <span id="date-year"></span>
+                                        <span id="mod-data" style="float:right" class="item-after"><i class="icon f7-icons">compose</i></span>
+                                    </div>
+                                    </div>
+                                </li>
+
+                                <li class="item-content">
+                                    <div class="item-media"><i class="icon f7-icons">time</i></div>
+                                    <div class="item-inner">
+                                        
+                                        <div class="item-title label">Ora</div>
+                                        <div class="item-input">
+                                            <span id="time-hour"></span> :
+                                            <span id="time-minute"></span> :
+                                            <span id="time-second"></span>
+                                            <span id="mod-ora" style="float:right" class="item-after"><i class="icon f7-icons">compose</i></span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="item-content">
+                                    <div class="item-media"><i class="icon f7-icons">world</i></div>
+                                    <div class="item-inner">
+                                    
+                                    <div class="item-title label">Lat</div>
+                                    <div class="item-input">
+                                        <span id="lat-val"></span>
+                                        <span id="mod-lat" style="float:right" class="item-after"><i class="icon f7-icons">compose</i></span>
+                                    </div>
+                                    </div>
+                                </li>
+                                <li class="item-content">
+                                    <div class="item-media"><i class="icon f7-icons">world</i></div>
+                                    <div class="item-inner">
+                                    
+                                    <div class="item-title label">Lon</div>
+                                    <div class="item-input">
+                                        <span id="lon-val"></span>
+                                        <span id="mod-lon" style="float:right" class="item-after"><i class="icon f7-icons">compose</i></span>
+                                    </div>
+                                    </div>
+                                </li>
+                                <!-- Divider -->
+                                <li class="item-divider">Divider title here</li>
+                                
                               </ul>
+
                             </form>
+                            </div>
+
+                            
                         </div>
                     </div>
                 </div>
@@ -119,6 +183,8 @@
                     <div class="page-content">
                         <div class="content-block">
                             <div class="content-block-title">Impostazioni</div>
+                            <div></div>
+                            <form><input id="data-temp-input" type="date"></form>
                         </div>
                     </div>
                 </div>
@@ -143,19 +209,19 @@
         <!-- Bottom Toolbar-->
         <div class="toolbar tabbar tabbar-labels">
             <div class="toolbar-inner">
-                <a href="#ble" class="tab-link active">
+                <a id="btn-con" href="#ble" class="tab-link active">
                     <i class="f7-icons">reload_found_fill</i>
                     <span class="tabbar-label">Connessione</span>
                 </a>
-                <a href="#stazione" class="tab-link">
+                <a id="btn-stz" href="#stazione" class="tab-link disabled">
                     <i class="f7-icons">home</i>
                     <span class="tabbar-label">Stazione</span>
                 </a>
-                <a href="#impostazioni" class="tab-link">
+                <a id="btn-imp" href="#impostazioni" class="tab-link disabled">
                     <i class="f7-icons">filter_fill</i>
                     <span class="tabbar-label">Impostazioni</span>
                 </a>
-                <a href="#avanzate" class="tab-link">
+                <a id="btn-avz" href="#avanzate" class="tab-link disabled">
                     <i class="f7-icons">gear</i>
                     <span class="tabbar-label">Avanzate</span>
                 </a>
