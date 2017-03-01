@@ -124,6 +124,7 @@ function getStatus(){
     readLat();
     readLon();
     readStatoMonit();
+    readEsp();
     
     $$('#btn-stz').removeClass('disabled');
     $$('#btn-imp').removeClass('disabled');
@@ -281,7 +282,7 @@ function readLon(){
 
 function readEsp(){
     ble.read(dev.id, stzService_uuid, tempo_monit_uuid, function(buf){ 
-                                                                stz['esp'] = bytesToFloat(buf);
+                                                                stz['esp'] = bytesToInt(buf);
                                                                 $$("#esp-val").html(stz['esp']);
                                                             }, function(){ });
 }

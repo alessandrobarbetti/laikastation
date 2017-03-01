@@ -15,5 +15,7 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+    <gap:plugin name="cordova-plugin-ble-central" source="npm" />
     <preference name="DisallowOverscroll" value="true" />
+    <preference name="phonegap-version" value="cli-6.1.0" />
 </widget>
