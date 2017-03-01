@@ -50,6 +50,14 @@ var mainView = myApp.addView('.view-main', {
     dynamicNavbar: true
 });
 
+$$('#search-ble-block').on('click', function(){
+    startDeviceScan();
+});
+
+$$('#disconnect-block').on('click', function(){
+    disconnect();
+});
+
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     ble.isEnabled(function() { startDeviceScan(); },
@@ -94,7 +102,7 @@ function listDevices(devices){
     $('#ble-devices ul').html("");
     if(devices.length > 0){   
         for(var i = 0; i < devices.length; i++){
-            var el = '<li class="item-content" onclick="connectToDevice('+i+')"><div class="item-inner"><div class="item-title">'+devices[i].name+'</div><div class="item-after">'+devices[i].id+'</div></div></li>';
+            var el = '<li class="item-content" ontouchend="connectToDevice('+i+')"><div class="item-inner"><div class="item-title">'+devices[i].name+'</div><div class="item-after">'+devices[i].id+'</div></div></li>';
             $('#ble-devices ul').append(el);
         }
     }else{
